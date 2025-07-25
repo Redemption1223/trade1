@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager - Frontend</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .config-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .config-form {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .config-form input {
+            flex: 1;
+            min-width: 300px;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .config-form button {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s ease;
+        }
+
+        .config-form button:hover {
+            background: #5a67d8;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+
+        .status-indicator.connected {
+            background: #48bb78;
+        }
+
+        .status-indicator.disconnected {
+            background: #f56565;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .stat-card p {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .task-form {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .task-form h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        .tasks-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .tasks-section h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .task-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .task-title.completed {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .task-description {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .task-meta {
+            font-size: 0.8rem;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .loading i {
+            font-size: 2rem;
+            color: #667eea;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .success {
+            background: #c6f6d5;
+            color: #22543d;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .config-form {
+                flex-direction: column;
+            }
+
+            .config-form input {
+                min-width: auto;
+            }
+
+            .task-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .task-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-tasks"></i> Task Manager</h1>
+            <p>Frontend connected to Streamlit Backend with Supabase</p>
+        </div>
+
+        <div class="config-section">
+            <div class="config-form">
+                <input 
+                    type="url" 
+                    id="apiUrl" 
+                    placeholder="Enter your Streamlit app URL (e.g., https://your-app.streamlit.app)"
+                    value=""
+                >
+                <button onclick="connectToAPI()">
+                    <i class="fas fa-plug"></i> Connect
+                </button>
+                <span id="connectionStatus">
+                    <span class="status-indicator disconnected"></span>
+                    Disconnected
+                </span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div id="messageContainer"></div>
+
+            <!-- Statistics -->
+            <div class="stats-grid" id="statsGrid" style="display: none;">
+                <div class="stat-card">
+                    <h3 id="totalTasks">0</h3>
+                    <p>Total Tasks</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="completedTasks">0</h3>
+                    <p>Completed</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="pendingTasks">0</h3>
+                    <p>Pending</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="completionRate">0%</h3>
+                    <p>Completion Rate</p>
+                </div>
+            </div>
+
+            <!-- Create Task Form -->
+            <div class="task-form" id="taskForm" style="display: none;">
+                <h2><i class="fas fa-plus"></i> Create New Task</h2>
+                <div class="form-group">
+                    <label for="taskTitle">Title *</label>
+                    <input type="text" id="taskTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="taskDescription">Description</label>
+                    <textarea id="taskDescription" placeholder="Optional description..."></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="createTask()">
+                    <i class="fas fa-plus"></i> Create Task
+                </button>
+            </div>
+
+            <!-- Tasks List -->
+            <div class="tasks-section" id="tasksSection" style="display: none;">
+                <h2><i class="fas fa-list"></i> Your Tasks</h2>
+                <div id="tasksList">
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                        <p>Loading tasks...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let API_BASE = '';
+        let isConnected = false;
+
+        // Load saved API URL from localStorage
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedUrl = localStorage.getItem('streamlit_api_url');
+            if (savedUrl) {
+                document.getElementById('apiUrl').value = savedUrl;
+                connectToAPI();
+            }
+        });
+
+        function showMessage(message, type = 'error') {
+            const container = document.getElementById('messageContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type;
+            messageDiv.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'check'}"></i> ${message}`;
+            container.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+
+        function updateConnectionStatus(connected) {
+            const statusElement = document.getElementById('connectionStatus');
+            const indicator = statusElement.querySelector('.status-indicator');
+            
+            if (connected) {
+                indicator.className = 'status-indicator connected';
+                statusElement.innerHTML = '<span class="status-indicator connected"></span> Connected';
+                document.getElementById('statsGrid').style.display = 'grid';
+                document.getElementById('taskForm').style.display = 'block';
+                document.getElementById('tasksSection').style.display = 'block';
+            } else {
+                indicator.className = 'status-indicator disconnected';
+                statusElement.innerHTML = '<span class="status-indicator disconnected"></span> Disconnected';
+                document.getElementById('statsGrid').style.display = 'none';
+                document.getElementById('taskForm').style.display = 'none';
+                document.getElementById('tasksSection').style.display = 'none';
+            }
+            
+            isConnected = connected;
+        }
+
+        async function connectToAPI() {
+            const urlInput = document.getElementById('apiUrl');
+            API_BASE = urlInput.value.trim();
+            
+            if (!API_BASE) {
+                showMessage('Please enter a valid Streamlit app URL');
+                return;
+            }
+
+            // Remove trailing slash
+            API_BASE = API_BASE.replace(/\/$/, '');
+            
+            try {
+                const response = await fetch(`${API_BASE}/?api=health`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    updateConnectionStatus(true);
+                    localStorage.setItem('streamlit_api_url', API_BASE);
+                    showMessage('Successfully connected to API!', 'success');
+                    loadTasks();
+                } else {
+                    throw new Error('API health check failed');
+                }
+            } catch (error) {
+                updateConnectionStatus(false);
+                showMessage(`Failed to connect: ${error.message}`);
+            }
+        }
+
+        async function loadTasks() {
+            if (!isConnected) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/?api=tasks`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    displayTasks(data.data);
+                    updateStats(data.data);
+                } else {
+                    throw new Error(data.message || 'Failed to load tasks');
+                }
+            } catch (error) {
+                showMessage(`Failed to load tasks: ${error.message}`);
+                document.getElementById('tasksList').innerHTML = 
+                    '<div class="error">Failed to load tasks. Please check your connection.</div>';
+            }
+        }
+
+        function displayTasks(tasks) {
+            const tasksList = document.getElementById('tasksList');
+            
+            if (tasks.length === 0) {
+                tasksList.innerHTML = '<p>No tasks found. Create your first task!</p>';
+                return;
+            }
+            
+            tasksList.innerHTML = tasks.map(task => `
+                <div class="task-item">
+                    <div class="task-content">
+                        <div class="task-title ${task.completed ? 'completed' : ''}">
+                            <i class="fas fa-${task.completed ? 'check-circle' : 'circle'}"></i>
+                            ${task.title}
+                        </div>
+                        ${task.description ? `<div class="task-description">${task.description}</div>` : ''}
+                        <div class="task-meta">
+                            Created: ${new Date(task.created_at).toLocaleDateString()}
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="btn btn-small btn-success" onclick="toggleTask(${task.id}, ${!task.completed})">
+                            <i class="fas fa-${task.completed ? 'undo' : 'check'}"></i>
+                            ${task.completed ? 'Undo' : 'Complete'}
+                        </button>
+                        <button class="btn btn-small btn-danger" onclick="deleteTask(${task.id})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateStats(tasks) {
+            const total = tasks.length;
+            const completed = tasks.filter(task => task.completed).length;
+            const pending = total - completed;
+            const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+            
+            document.getElementById('totalTasks').textContent = total;
+            document.getElementById('completedTasks').textContent = completed;
+            document.getElementById('pendingTasks').textContent = pending;
+            document.getElementById('completionRate').textContent = `${completionRate}%`;
+        }
+
+        async function createTask() {
+            if (!isConnected) return;
+            
+            const title = document.getElementById('taskTitle').value.trim();
+            const description = document.getElementById('taskDescription').value.trim();
+            
+            if (!title) {
+                showMessage('Please enter a task title');
+                return;
+            }
+            
+            try {
+                const url = `${API_BASE}/?api=create_task&title=${encodeURIComponent(title)}&description=${encodeURIComponent(description)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    showMessage('Task created successfully!', 'success');
+                    document.getElementById('taskTitle').value = '';
+                    document.getElementById('taskDescription').value = '';
+                    loadTasks();
+                } else {
+                    throw new Error(data.message || 'Failed to create task');
+                }
+            } catch (error) {
+                showMessage(`Failed to create task: ${error.message}`);
+            }
+        }
+
+        async function toggleTask(taskId, completed) {
+            if (!isConnected) return;
+            
+            try {
+                // First get the current task data
+                const getResponse = await fetch(`${API_BASE}/?api=task&id=${taskId}`);
+                const getData = await getResponse.json();
+                
+                if (getData.status !== 'success') {
+                    throw new Error('Failed to get task data');
+                }
+                
+                const task = getData.data;
+                const url = `${API_BASE}/?api=update_task&id=${taskId}&title=${encodeURIComponent(task.title)}&description=${encodeURIComponent(task.description || '')}&completed=${completed}`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    showMessage('Task updated successfully!', 'success');
+                    loadTasks();
+                } else {
+                    throw new Error(data.message || 'Failed to update task');
+                }
+            } catch (error) {
+                showMessage(`Failed to update task: ${error.message}`);
+            }
+        }
+
+        async function deleteTask(taskId) {
+            if (!isConnected) return;
+            
+            if (!confirm('Are you sure you want to delete this task?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/?api=delete_task&id=${taskId}`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    showMessage('Task deleted successfully!', 'success');
+                    loadTasks();
+                } else {
+                    throw new Error(data.message || 'Failed to delete task');
+                }
+            } catch (error) {
+                showMessage(`Failed to delete task: ${error.message}`);
+            }
+        }
+
+        // Allow creating tasks with Enter key
+        document.getElementById('taskTitle').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                createTask();
+            }
+        });
+    </script>
+</body>
+</html>
